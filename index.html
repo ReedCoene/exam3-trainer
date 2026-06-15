@@ -290,6 +290,13 @@ textarea.answerbox:focus{outline:none;border-color:var(--accent)}
 .model-answer li:before{content:"▸";position:absolute;left:2px;color:var(--accent2)}
 .self-grade{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
 .recall-count{color:var(--muted);font-size:13px;font-weight:600;margin-bottom:10px}
+.recall-autoscore{font-size:13px;margin:0 0 12px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 12px;line-height:1.45}
+.recall-autoscore .muted{color:var(--muted)}
+.model-answer li.recall-pt{padding-left:2px;position:static;display:flex;gap:8px;align-items:flex-start}
+.model-answer li.recall-pt:before{display:none}
+.recall-pt .pt-mark{font-weight:800;min-width:16px;flex:0 0 auto}
+.recall-pt.hit .pt-mark{color:var(--right)}
+.recall-pt.miss .pt-mark{color:var(--muted)}
 
 /* ===== BRAIN DUMP ===== */
 .bd-intro{background:rgba(154,123,255,.08);border:1px solid #9a7bff;border-left:3px solid #9a7bff;border-radius:10px;padding:13px 16px;margin-bottom:16px;font-size:14px}

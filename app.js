@@ -170,6 +170,16 @@ function renderRecall(main, scope){
   const stage=el("div","recall-stage"); main.appendChild(stage);
   drawRecall(stage);
 }
+// lightweight offline "grader": keyword overlap between the typed answer and each model point
+const RECALL_STOP=new Set("the a an of to and or for in on with by is are as it it's its their our your you you're they we how this that these those into be can will would should value amount each within over also both per via just very then than from at not but so if no using use other more most less which what when does do".split(" "));
+function recallKeywords(s){
+  return [...new Set((s.toLowerCase().replace(/<[^>]+>/g," ").match(/[a-z][a-z\-]{3,}|\d[\d,\.]*%?/g)||[]))].filter(w=>!RECALL_STOP.has(w));
+}
+function pointCovered(userText, point){
+  const kws=recallKeywords(point); if(!kws.length) return false;
+  const hits=kws.filter(k=>userText.includes(k)).length;
+  return hits>0 && (hits/kws.length>=0.4 || hits>=3);
+}
 function drawRecall(stage){
   stage.innerHTML="";
   if(recallPos>=recallDeck.length){
@@ -187,8 +197,20 @@ function drawRecall(stage){
   stage.appendChild(reveal);
   reveal.onclick=()=>{
     reveal.remove();
+    ta.setAttribute("readonly","readonly");
+    const typed=ta.value.trim().length>0;
+    const userText=" "+(ta.value||"").toLowerCase().replace(/<[^>]+>/g," ")+" ";
+    let cov=0;
+    const lis=r.points.map(p=>{
+      const hit=typed && pointCovered(userText,p);
+      if(hit) cov++;
+      return `<li class="recall-pt ${hit?"hit":"miss"}"><span class="pt-mark">${hit?"✓":"○"}</span><span>${p}</span></li>`;
+    }).join("");
+    const score = typed
+      ? `<div class="recall-autoscore">Auto-check: your answer appears to cover <b>${cov} of ${r.points.length}</b> key point${r.points.length>1?"s":""}. <span class="muted">It's a keyword match, not a perfect grader — the ○ points may just be worded differently, so eyeball them too.</span></div>`
+      : `<div class="recall-autoscore muted">Tip: type your answer <i>before</i> revealing and the auto-check will mark which points you hit.</div>`;
     const ma=el("div","model-answer");
-    ma.innerHTML=`<h3>Model answer — did you hit these?</h3><ul>${r.points.map(p=>`<li>${p}</li>`).join("")}</ul>`;
+    ma.innerHTML=`<h3>Model answer — check yourself</h3>${score}<ul>${lis}</ul>`;
     stage.appendChild(ma);
     const grade=el("div","self-grade");
     const got=el("button","btn","✓ I had it");
@@ -790,6 +812,40 @@ const DRILLS = {
       <p class="tip">Assets move OPPOSITE to cash; liabilities move WITH cash. Subtract gains, add losses.</p>`;
     return {title:"CFS — operating (indirect)", prompt, choices, answerIdx, solution};
   },
+  // ---- CFS direct method: cash paid/collected (one universal sign rule) ----
+  cfsdirect(){
+    const v=pick(["suppliers","taxes","customers"]);
+    const fmt=x=>money(x);
+    const sg=x=>(x>=0?"increased":"decreased")+" "+money(Math.abs(x));
+    if(v==="suppliers"){
+      const cogs=rint(150,450)*1000, invInc=pick([-1,1])*rint(5,40)*1000, apInc=pick([-1,1])*rint(5,40)*1000;
+      const paid=cogs+invInc-apInc;
+      const {choices,answerIdx}=numChoices(paid, ()=>[ cogs-invInc+apInc, cogs+invInc+apInc, cogs ], fmt);
+      const prompt=`<p>COGS was <b>${money(cogs)}</b>. During the year Inventory ${sg(invInc)} and Accounts Payable ${sg(apInc)}. Under the direct method, what was <b>cash paid to suppliers</b>?</p>`;
+      const solution=`<p>Start −COGS. Inventory (asset) ${invInc>=0?"increase → subtract":"decrease → add"}; A/P (liability) ${apInc>=0?"increase → add":"decrease → subtract"}.</p>
+        <p>Cash paid = COGS + ↑inventory − ↑A/P = ${money(cogs)} ${invInc>=0?"+":"−"} ${money(Math.abs(invInc))} ${apInc>=0?"−":"+"} ${money(Math.abs(apInc))} = <b>${money(paid)}</b>.</p>
+        <p class="tip">Asset ↑ subtracts cash, liability ↑ adds cash — same rule as indirect; the expense just starts negative.</p>`;
+      return {title:"CFS — cash paid to suppliers (direct)", prompt, choices, answerIdx, solution};
+    }
+    if(v==="taxes"){
+      const exp=rint(50,300)*1000, payInc=pick([-1,1])*rint(5,30)*1000;
+      const paid=exp-payInc;
+      const {choices,answerIdx}=numChoices(paid, ()=>[ exp+payInc, exp, Math.abs(payInc) ], fmt);
+      const prompt=`<p>Income tax expense was <b>${money(exp)}</b>. Income taxes payable ${sg(payInc)} during the year. Under the direct method, what was <b>cash paid for income taxes</b>?</p>`;
+      const solution=`<p>Start −Tax expense. Taxes payable (liability) ${payInc>=0?"increase → add":"decrease → subtract"}.</p>
+        <p>Cash paid = Tax expense − ↑taxes payable = ${money(exp)} ${payInc>=0?"−":"+"} ${money(Math.abs(payInc))} = <b>${money(paid)}</b>.</p>
+        <p class="tip">A taxes-payable increase means you paid LESS than the expense (the liability conserved cash).</p>`;
+      return {title:"CFS — cash paid for taxes (direct)", prompt, choices, answerIdx, solution};
+    }
+    const sales=rint(300,800)*1000, arInc=pick([-1,1])*rint(5,50)*1000;
+    const got=sales-arInc;
+    const {choices,answerIdx}=numChoices(got, ()=>[ sales+arInc, sales, Math.abs(arInc) ], fmt);
+    const prompt=`<p>Sales (all on account) were <b>${money(sales)}</b>. Accounts Receivable ${sg(arInc)} during the year. Under the direct method, what was <b>cash collected from customers</b>?</p>`;
+    const solution=`<p>Start +Sales. A/R (asset) ${arInc>=0?"increase → subtract":"decrease → add"}.</p>
+      <p>Cash collected = Sales − ↑A/R = ${money(sales)} ${arInc>=0?"−":"+"} ${money(Math.abs(arInc))} = <b>${money(got)}</b>.</p>
+      <p class="tip">Revenue starts positive (cash in); the asset A/R moves opposite to cash.</p>`;
+    return {title:"CFS — cash from customers (direct)", prompt, choices, answerIdx, solution};
+  },
   // ---- CFS classification ----
   cfsclassify(){
     const items=[
@@ -846,6 +902,7 @@ const DRILL_META=[
   ["installment","Installment note split","Ch 9"],
   ["dividend","Dividend allocation","Ch 10"],
   ["cfsindirect","CFS operating (indirect)","Ch 11"],
+  ["cfsdirect","CFS direct (cash paid/collected)","Ch 11"],
   ["cfsclassify","CFS classification","Ch 11"],
   ["ratios","Debt & equity ratios","Ch 9/10"]
 ];
@@ -1028,7 +1085,8 @@ function renderGotchas(main){
      <tr><td>Interest paid <i>and</i> interest received</td><td>Operating</td></tr>
      <tr><td>Buying/selling equipment, plant, investments</td><td>Investing</td></tr>
      <tr><td>Issuing/repaying bond & note <b>principal</b>, stock, treasury</td><td>Financing</td></tr></table>
-     <ul><li>Indirect signs: <b>assets ↑ subtract / ↓ add</b>; <b>liabilities ↑ add / ↓ subtract</b>. Add back depreciation; subtract gains, add losses.</li>
+     <ul><li><b>One sign rule for BOTH methods:</b> assets ↑ subtract / ↓ add; liabilities ↑ add / ↓ subtract. Indirect: start at net income (add back depreciation, subtract gains, add losses). Direct: write each expense as a negative cash-out first, then apply the same rule — so an A/P or taxes-payable increase ADDS, an inventory or prepaid increase SUBTRACTS.</li>
+     <li>Direct results: cash to suppliers = COGS + ↑inventory − ↑A/P; cash for taxes = Tax expense − ↑taxes payable; cash from customers = Sales − ↑A/R.</li>
      <li>Cash from selling an asset = <b>book value ± gain/loss</b>, all reported in Investing.</li>
      <li>Buying an asset partly with a note: only the <b>cash</b> portion is Investing; the financed part is a <b>non-cash</b> disclosure.</li></ul>`);
 
@@ -1066,6 +1124,7 @@ function renderCram(main){
       <li><b>Dividends declared</b> = Beg RE + Net income − End RE · <b>Cash dividends paid</b> = declared − ΔDividends payable</li>
       <li><b>ROE</b> = NI ÷ avg equity · <b>EPS</b> = (NI − pref div) ÷ shares · <b>P/E</b> = price ÷ EPS · <b>Div yield</b> = DPS ÷ price</li>
       <li><b>Cash from asset sale</b> = book value ± gain/loss (Investing)</li>
+      <li><b>Direct method (one rule):</b> revenue starts +, each expense starts −; then asset ↑ subtract, liability ↑ add → Cash to suppliers = COGS + ↑inventory − ↑A/P · Cash for taxes = Tax exp − ↑taxes payable</li>
     </ul>`;
   main.appendChild(formulas);
 
@@ -1094,7 +1153,7 @@ function renderCram(main){
     <div><b>Stock split</b><br>No entry · par ↓ · equity unchanged</div>
     <div><b>Cumulative preferred</b><br>Pay arrears + current before common</div>
     <div><b>CFS sections</b><br>Oper=income · Invest=LT assets · Finance=debt/owners</div>
-    <div><b>Indirect signs</b><br>Assets ↑ subtract · Liabilities ↑ add</div>
+    <div><b>Sign rule (both methods)</b><br>Assets ↑ subtract · Liabilities ↑ add (direct: expenses start −)</div>
     <div><b>Gains/losses</b><br>Subtract gains · add losses back</div>
     <div><b>Dividends</b><br>Received=Operating · Paid=Financing</div>
     <div><b>Interest (both)</b><br>Operating</div>

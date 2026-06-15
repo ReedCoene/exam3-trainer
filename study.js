@@ -112,11 +112,12 @@ const RECALL = [
     "Subtract gains, add losses (cash is in Investing).",
     "Current assets: increase → subtract, decrease → add.",
     "Current liabilities: increase → add, decrease → subtract."]},
-  { ch:"ch11", kind:"Formula", q:"Give the direct-method formulas for cash from customers, cash paid to suppliers, and cash paid for taxes.", points:[
-    "Cash from customers = Sales − increase in A/R (+ decrease in A/R).",
-    "Cash paid to suppliers = COGS + increase in inventory − increase in A/P.",
-    "Cash paid for taxes = Tax expense − increase in taxes payable (+ decrease).",
-    "Rule: income-statement amount adjusted by the related balance-sheet change."]},
+  { ch:"ch11", kind:"Formula", q:"Give the direct-method figures for cash from customers, cash paid to suppliers, and cash paid for taxes — using the universal sign rule.", points:[
+    "Universal rule: revenue starts +, every expense starts − (cash out); then asset ↑ SUBTRACT, liability ↑ ADD.",
+    "Cash from customers: +Sales − increase in A/R.",
+    "Cash paid to suppliers: −COGS − ↑inventory + ↑A/P → cash paid = COGS + increase in inventory − increase in A/P.",
+    "Cash paid for taxes: −Tax expense + ↑taxes payable → cash paid = Tax expense − increase in taxes payable.",
+    "Same asset/liability rule as the indirect method — just enter expenses as negatives first."]},
   { ch:"ch11", kind:"Process", q:"How do you find the cash RECEIVED from selling a fixed asset, and where does it go?", points:[
     "Cash received = book value ± gain/loss (book value + gain, or − loss).",
     "All proceeds go in the Investing section.",

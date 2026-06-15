@@ -192,11 +192,12 @@ const CHAPTERS = [
         "Depreciation is added back because it reduced net income but used no cash."
       ]},
       { h:"Operating — Direct Method", items:[
-        "<b>Cash from customers</b> = Sales − increase in A/R (or + decrease in A/R).",
-        "<b>Cash paid to suppliers</b> = COGS + increase in inventory − increase in A/P (flip the signs for decreases). [+inv↑, −inv↓, −A/P↑, +A/P↓]",
-        "<b>Cash paid for taxes</b> = Tax expense + decrease in taxes payable (or − increase in taxes payable).",
-        "<b>Cash paid for operating expenses</b> = Expense + increase in prepaid − decrease in prepaid ± accrued-liability change.",
-        "General rule: start with the income-statement amount and adjust by the related balance-sheet account change to get the cash figure."
+        "<b>Same universal rule as indirect:</b> assets move OPPOSITE to cash, liabilities move WITH cash. Just enter each income item at its cash sign first — <b>revenue is + (cash in), every expense is − (cash out)</b> — then adjust by the related account.",
+        "<b>Cash from customers:</b> start <b>+Sales</b>; A/R is an asset → increase SUBTRACT, decrease ADD. ⇒ Sales − increase in A/R.",
+        "<b>Cash paid to suppliers:</b> start <b>−COGS</b>; inventory (asset) increase SUBTRACT, A/P (liability) increase ADD ⇒ −COGS − ↑inventory + ↑A/P. The cash <i>paid</i> (outflow) = COGS + increase in inventory − increase in A/P.",
+        "<b>Cash paid for taxes:</b> start <b>−Tax expense</b>; taxes payable (liability) increase ADD ⇒ −Tax expense + ↑taxes payable. The cash <i>paid</i> = Tax expense − increase in taxes payable.",
+        "<b>Cash paid for operating expenses:</b> start <b>−Expense</b>; prepaid (asset) increase SUBTRACT, accrued liability increase ADD.",
+        "Bottom line: an <b>increase in any liability</b> (A/P, taxes payable, accruals) <b>ADDS to cash</b>, an <b>increase in any asset</b> (inventory, prepaid) <b>SUBTRACTS</b> — exactly like the indirect method. The only new step is writing each expense as a negative first."
       ]},
       { h:"Investing Section", items:[
         "Include <b>cash actually paid/received</b> for long-term assets and investments.",
@@ -214,7 +215,7 @@ const CHAPTERS = [
     ],
     mnemonics:[
       "<b>O / I / F:</b> Operating = income-statement stuff; Investing = long-term Assets; Financing = debt & owners (bonds, stock, dividends paid).",
-      "<b>Indirect signs — 'A.L.O.E.' feel:</b> Assets ↑ subtract / ↓ add; Liabilities ↑ add / ↓ subtract.",
+      "<b>ONE sign rule for BOTH methods:</b> Assets ↑ subtract / ↓ add; Liabilities ↑ add / ↓ subtract. (Direct method: just write each expense as a negative cash-out first, then apply it.)",
       "<b>Gains & losses:</b> SUBTRACT gains, ADD losses back in operating (the cash lives in Investing).",
       "<b>Dividends: received = Operating, paid = Financing. Interest (paid OR received) = Operating.</b>",
       "<b>Cash from asset sale = book value ± gain/loss</b> → all of it goes to Investing."
@@ -284,8 +285,8 @@ const FLASHCARDS = [
   ["ch11","Indirect: current liability change","Increase → add; Decrease → subtract"],
   ["ch11","Indirect: gains and losses","Subtract gains, add losses back"],
   ["ch11","Cash from customers (direct)","Sales − increase in A/R (or + decrease in A/R)"],
-  ["ch11","Cash paid to suppliers (direct)","COGS + increase in inventory − increase in A/P"],
-  ["ch11","Cash paid for taxes (direct)","Tax expense − increase in taxes payable (or + decrease)"],
+  ["ch11","Cash paid to suppliers (direct)","Start −COGS, then asset↑ subtract / liab↑ add. Cash paid = COGS + ↑inventory − ↑A/P"],
+  ["ch11","Cash paid for taxes (direct)","Start −Tax expense, then liab↑ add. Cash paid = Tax expense − ↑taxes payable"],
   ["ch11","Cash received on asset sale","Book value ± gain/loss → reported in Investing"],
   ["ch11","Cash paid for dividends","Dividends declared − increase in Dividends Payable"]
 ];
