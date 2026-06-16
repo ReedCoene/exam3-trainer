@@ -325,6 +325,25 @@ function renderLearn(main, chId){
     main.appendChild(s);
   });
 
+  // worked journal entries for this chapter (so the "what gets debited/credited?" questions click)
+  const jents = (typeof JOURNALS!=="undefined") ? JOURNALS.filter(j=>j.ch===ch.id) : [];
+  if(jents.length){
+    const jeTable=lines=>{
+      const drs=lines.filter(l=>l.dr).map(l=>`<tr><td>${l.acct}</td><td class="r">${money(l.dr)}</td><td class="r"></td></tr>`).join("");
+      const crs=lines.filter(l=>l.cr).map(l=>`<tr class="cr"><td>${l.acct}</td><td class="r"></td><td class="r">${money(l.cr)}</td></tr>`).join("");
+      return `<table class="je-model-tbl"><tr><th>Account</th><th class="r">Debit</th><th class="r">Credit</th></tr>${drs}${crs}</table>`;
+    };
+    const jb=el("div","lesson-sec je-learn-block");
+    jb.appendChild(el("h2",null,"📒 Journal entries to know"));
+    jb.insertAdjacentHTML("beforeend",`<p class="je-learn-intro">The exact debits &amp; credits for this chapter — learn the pattern here so the "what gets debited/credited?" questions become automatic, then drill them on the ✍️ Journal tab.</p>`);
+    jents.forEach(j=>{
+      jb.insertAdjacentHTML("beforeend",`<div class="je-learn"><div class="je-learn-desc">${j.prompt}</div>${jeTable(j.lines)}<div class="je-learn-why">${j.why}</div></div>`);
+    });
+    const pb=el("button","btn ghost small","Practice these entries →"); pb.onclick=()=>go("journals",ch.id);
+    jb.appendChild(pb);
+    main.appendChild(jb);
+  }
+
   const mn = el("div","mnemo");
   mn.appendChild(el("h2",null,"🧠 Memory hooks"));
   const ul = el("ul");
