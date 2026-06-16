@@ -513,6 +513,15 @@ function renderQuiz(main, cfg){
       main.appendChild(wf);
     }
 
+    const fg=el("button","quiz-feature");
+    fg.style.cssText="background:linear-gradient(135deg,#3a3320,#29240f);border-color:#ffd24d";
+    const gTypes=new Set(REALQ.map(archetypeOf)).size;
+    fg.innerHTML=`<div class="feat-badge" style="background:#ffd24d;color:#1a1f2e">🏁 FINAL GAUNTLET</div>
+      <h3>One of every question type (${gTypes} types)</h3>
+      <p>Exactly one question from each distinct type in the bank — TVM, bond pricing, amortization, retirement, installment notes, dividends, treasury, every cash-flow type, and more. Clear it and nothing on the exam can surprise you.</p>`;
+    fg.onclick=()=>go("quiz",{mode:"gauntlet"});
+    main.appendChild(fg);
+
     const ft=el("button","quiz-feature timed");
     ft.innerHTML=`<div class="feat-badge gold">⏱ TIMED MOCK EXAM</div>
       <h3>Timed Simulator — 30 questions, 45 min</h3>
@@ -583,6 +592,7 @@ function renderQuiz(main, cfg){
   else if(cfg.mode==="practice") quizSet=shuffle(ALLQ.filter(q=>q.src==="P"));
   else if(cfg.mode==="exams") quizSet=shuffle(ALLQ.filter(q=>q.src==="PE"));
   else if(cfg.mode==="mock") quizSet=shuffle(ALLQ.filter(q=>q.src==="M"));
+  else if(cfg.mode==="gauntlet"){ const g={}; REALQ.forEach(q=>{ const a=archetypeOf(q); (g[a]=g[a]||[]).push(q); }); quizSet=shuffle(Object.keys(g).map(k=>pick(g[k]))); }
   else if(cfg.mode==="pattern") quizSet=shuffle(REALQ.filter(q=>archetypeOf(q)===cfg.pattern));
   else if(cfg.mode==="flagged") quizSet=shuffle(ALLQ.filter(isFlagged));
   else if(cfg.mode==="weak") quizSet=shuffle(ALLQ.filter(isMissed));
@@ -627,9 +637,11 @@ function drawQuiz(main){
   const cm=chMeta(q.ch);
   const w=srcWord(q.src);
   const srcTag = w?`<span class='src ${q.src==="P"||q.src==="PE"||q.src==="M"||q.src==="B"?"src-p":q.src==="T"?"src-t":"src-l"}'>${w}</span>`:"";
+  const gaunt = quizCfg&&quizCfg.mode==="gauntlet";
+  const typeTag = gaunt?`<div class="q-tag" style="color:#ffd24d;border-color:#ffd24d">${archetypeOf(q)}</div>`:"";
   const head=el("div","quiz-head");
-  head.innerHTML=`<div class="q-prog">Question ${quizPos+1} / ${quizSet.length}</div>
-    <div class="q-right">${srcTag}<div class="q-tag">${cm.tab}</div>${timed?`<div class="q-timer" id="qtimer">--:--</div>`:""}</div>`;
+  head.innerHTML=`<div class="q-prog">Question ${quizPos+1} / ${quizSet.length}${gaunt?" · every type":""}</div>
+    <div class="q-right">${srcTag}${typeTag}<div class="q-tag">${cm.tab}</div>${timed?`<div class="q-timer" id="qtimer">--:--</div>`:""}</div>`;
   main.appendChild(head);
   head.querySelector(".q-right").appendChild(flagBtn(q));
   const pbar=el("div","bar slim"); pbar.innerHTML=`<div class="bar-fill" style="width:${100*quizPos/quizSet.length}%"></div>`;

@@ -182,23 +182,26 @@ const BRAINDUMP = {
 /* ---------- question archetypes (for the Pattern Trainer) ---------- */
 function archetypeOf(q){
   const t=((q.q||"")+" "+(q.choices?q.choices.join(" "):"")).toLowerCase();
+  // Statement of Cash Flows questions FIRST — they mention bonds/stock/treasury but are CFS items
+  if(/classify|what section|which.*\bsection\b|operating, investing|reported in.*section/.test(t)) return "CFS — classification";
+  if(/cash collected|collections from customers|cash paid to suppliers|cash paid for (income )?tax|cash paid for operating|direct method/.test(t)) return "CFS — direct method";
+  if(/operating activities|operating section|net cash.*operating|indirect method/.test(t)) return "CFS — operating";
+  if(/investing activities|investing section|net cash.*investing|from investing|cash flow from investing/.test(t)) return "CFS — investing";
+  if(/financing activities|financing section|net cash.*financing|from financing|cash flow from financing|cash paid for dividends/.test(t)) return "CFS — financing";
+  // Debt ratios, bonds, notes, leases, TVM
+  if(/debt.to.equity|times.interest.earned/.test(t)) return "Debt ratios";
   if(/issue price|present value of the bond|sell at|selling price of the bond/.test(t)) return "Bond issue price";
   if(/interest expense|amortization|carrying value of the bond|effective/.test(t)) return "Bond interest & amortization";
   if(/retire|retirement|repurchas/.test(t)) return "Bond retirement (gain/loss)";
   if(/installment note|monthly payment|carrying value.*loan|interest.*first month/.test(t)) return "Installment notes";
   if(/lease/.test(t)) return "Leases (record at PV)";
   if(/future value|present value|compound|annuity|deposit|signing bonus|cd /.test(t)) return "Time value of money";
-  if(/debt to equity|times interest earned/.test(t)) return "Debt ratios";
+  // Equity
   if(/preferred|cumulative|arrears|dividend.*common|common.*dividend/.test(t)) return "Dividend allocation";
   if(/treasury/.test(t)) return "Treasury stock";
   if(/stock dividend|stock split|par value/.test(t)) return "Stock dividends & splits";
   if(/outstanding|authorized|issued|paid-in capital|no par|stated value/.test(t)) return "Stock issuance & shares";
   if(/return on equity|earnings per share|price-earnings|dividend yield|p\/e/.test(t)) return "Equity ratios";
-  if(/operating activities|net cash.*operating|indirect method/.test(t)) return "CFS — operating";
-  if(/direct method|cash collected|cash paid to suppliers|cash paid for/.test(t)) return "CFS — direct method";
-  if(/investing activities/.test(t)) return "CFS — investing";
-  if(/financing activities/.test(t)) return "CFS — financing";
-  if(/classify|what section|operating, investing/.test(t)) return "CFS — classification";
   return "Other";
 }
 
